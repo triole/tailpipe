@@ -1,0 +1,23 @@
+file_to_watch = "/tmp/tailpipe_test.log"
+regex_filter = "(error|fatal)"
+action = "mail"
+
+[mail]
+host = "bear.local"
+port = 1025
+user = "test_user"
+pass = "none"
+encryption = "none"    # "none", "ssl", "tls"
+
+addr_from = "sender@local.mailer"
+addr_to = ["recipient@mail.somewhere"]
+subject = "Tailpipe error message"
+template = """
+<h1> hello world </h1>
+<p>
+    The following error occured:
+</p>
+<p>
+    {{.Message}}
+</p>
+"""
