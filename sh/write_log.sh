@@ -10,6 +10,8 @@ echo "Write test messages to ${tf}"
 # test script generating a log file
 while true; do
     r=$((RANDOM % 5 + 1))
-    sleep ${r}
+    if [[ "${1}" != "--flood" ]]; then
+        sleep ${r}
+    fi
     echo -e "[${arr[$r - 1]}]\t$(date)" | tee -a "${tf}"
 done
