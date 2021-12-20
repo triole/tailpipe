@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"strconv"
+	"strings"
 	"tailpipe/payload"
 	"text/template"
 )
@@ -27,8 +28,17 @@ func SendMail(p payload.Payload, conf Mail) {
 	}
 	var body bytes.Buffer
 
-	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: "+conf.Subject+" \n%s\n\n", mimeHeaders)))
+	mimeHeaders := []string{
+		"Content-Transfer-Encoding: quoted-printable",
+		"Content-Type: text/plain; charset=UTF-8",
+		"MIME-version: 1.0",
+		"From: <" + conf.AddrFrom + ">",
+		"To: " + joinMailAddr(conf.AddrTo),
+		"Subject: " + conf.Subject,
+		"\n\n",
+	}
+	body.Write([]byte(strings.Join(mimeHeaders, "\n")))
+
 	errorStr := ""
 	if p.TailError != nil {
 		errorStr = fmt.Sprintf("%s", p.TailError)
@@ -54,4 +64,13 @@ func SendMail(p payload.Payload, conf Mail) {
 		return
 	}
 	fmt.Printf("Email sent to via %s to %s\n", conf.Host, conf.AddrTo)
+}
+
+func joinMailAddr(arr []string) (r string) {
+	var arr2 []string
+	for _, el := range arr {
+		arr2 = append(arr2, "<"+el+">")
+	}
+	r = strings.Join(arr2, ", ")
+	return
 }
