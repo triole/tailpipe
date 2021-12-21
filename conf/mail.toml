@@ -9,9 +9,9 @@ user = "test_user"
 pass = "none"
 encryption = "none"    # "none", "ssl", "tls"
 
-addr_from = "sender@local.mailer"
-addr_to = ["recipient@mail.somewhere", "another@recipient.mail"]
-subject = "Tailpipe Error on {{.Host}}"
+addr_from = "tailpipe@watch.local"
+addr_to = ["recipient@mail.somewhere"]
+subject = "Error on {{.Host}}"
 template = """
 Date:
 {{.Date}}
