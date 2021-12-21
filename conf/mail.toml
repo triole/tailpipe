@@ -9,7 +9,7 @@ user = "test_user"
 pass = "none"
 encryption = "none"    # "none", "ssl", "tls"
 
-addr_from = "tailpipe@watch.local"
+addr_from = "tailpipe@vigilant.watch"
 addr_to = ["recipient@mail.somewhere"]
 subject = "Error on {{.Host}}"
 template = """
