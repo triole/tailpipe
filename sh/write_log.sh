@@ -2,6 +2,9 @@
 
 tf="/tmp/tailpipe_test.log"
 
+json='{"level":"error","date":"now","msg":"something bad happened","info":"some more information"}'
+text="an error message"
+
 arr=(
     "debug" "info" "warn" "error" "fatal"
 )
@@ -13,5 +16,11 @@ while true; do
     if [[ "${1}" != "--flood" ]]; then
         sleep ${r}
     fi
-    echo -e "[${arr[$r - 1]}]\t$(date)" | tee -a "${tf}"
+
+    msg="[${arr[$r - 1]}]\t$(date) ${text}"
+    q=$((RANDOM % 3 + 1))
+    if (("${q}" == 2)); then
+        msg="${json}"
+    fi
+    echo -e "${msg}" | tee -a "${tf}"
 done

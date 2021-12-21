@@ -12,6 +12,10 @@ import (
 
 // SendMail sends an email via smtp
 func SendMail(p payload.Payload, conf Mail) {
+	if p.TailError != nil {
+		p.TailErrorStr = fmt.Sprintf("%s", p.TailError)
+	}
+
 	auth := smtp.PlainAuth("", conf.AddrFrom, conf.Pass, conf.Host)
 	if conf.Encryption == "none" {
 		auth = unencryptedAuth{
@@ -21,13 +25,6 @@ func SendMail(p payload.Payload, conf Mail) {
 		}
 	}
 
-	t, err := template.New("users").Parse(conf.Template)
-	if err != nil {
-		fmt.Printf("[error] Can not parse mail template: %q\n", err)
-		panic(err)
-	}
-	var body bytes.Buffer
-
 	mimeHeaders := []string{
 		"Content-Transfer-Encoding: quoted-printable",
 		"Content-Type: text/plain; charset=UTF-8",
@@ -35,27 +32,15 @@ func SendMail(p payload.Payload, conf Mail) {
 		"From: <" + conf.AddrFrom + ">",
 		"To: " + joinMailAddr(conf.AddrTo),
 		"Subject: " + conf.Subject,
-		"\n\n",
+		"\n",
 	}
+
+	var body bytes.Buffer
 	body.Write([]byte(strings.Join(mimeHeaders, "\n")))
+	body.Write([]byte(conf.Template))
+	body = execTemplate(body.String(), p)
 
-	errorStr := ""
-	if p.TailError != nil {
-		errorStr = fmt.Sprintf("%s", p.TailError)
-	}
-	t.Execute(&body, struct {
-		Date      string
-		Host      string
-		TailError string
-		Text      string
-	}{
-		Date:      p.Date,
-		Host:      p.Host,
-		TailError: errorStr,
-		Text:      p.Text,
-	})
-
-	err = smtp.SendMail(
+	err := smtp.SendMail(
 		conf.Host+":"+strconv.Itoa(conf.Port),
 		auth, conf.AddrFrom, conf.AddrTo, body.Bytes(),
 	)
@@ -73,4 +58,26 @@ func joinMailAddr(arr []string) (r string) {
 	}
 	r = strings.Join(arr2, ", ")
 	return
+}
+
+func execTemplate(str string, p payload.Payload) bytes.Buffer {
+	var buf bytes.Buffer
+	tpl, err := template.New("template").Parse(str)
+	if err != nil {
+		fmt.Printf("[error] Can not parse mail template: %q\n", err)
+		panic(err)
+	}
+
+	tpl.Execute(&buf, struct {
+		Date      string
+		Host      string
+		TailError string
+		Text      string
+	}{
+		Date:      p.Date,
+		Host:      p.Host,
+		TailError: p.TailErrorStr,
+		Text:      p.Text,
+	})
+	return buf
 }

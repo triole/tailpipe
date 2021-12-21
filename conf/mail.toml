@@ -11,13 +11,16 @@ encryption = "none"    # "none", "ssl", "tls"
 
 addr_from = "sender@local.mailer"
 addr_to = ["recipient@mail.somewhere", "another@recipient.mail"]
-subject = "Tailpipe Error Message"
+subject = "Tailpipe Error on {{.Host}}"
 template = """
-Error on {{.Host}} at {{.Date}}
+Date:
+{{.Date}}
 
+Message:
 {{.Text}}
 
 {{if .TailError}}
-    There was a tail error:<br>{{.TailError}}<br><br>
+There was a tail error:
+{{.TailError}}
 {{end}}
 """

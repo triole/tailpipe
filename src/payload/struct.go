@@ -13,11 +13,12 @@ var (
 
 // Payload holds the information that are transmitted
 type Payload struct {
-	Date      string
-	LogFile   string
-	Host      string
-	Text      string
-	TailError error
+	Date         string
+	LogFile      string
+	Host         string
+	Text         string
+	TailError    error
+	TailErrorStr string
 }
 
 // NewPayload returns a new payload object
