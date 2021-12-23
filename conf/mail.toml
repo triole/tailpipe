@@ -1,5 +1,5 @@
 file_to_watch = "/tmp/tailpipe_test.log"
-regex_filter = "(error|fatal)"
+regex_filter = "(?i)(error|fail|fatal)"
 action = "mail"
 
 [mail]
