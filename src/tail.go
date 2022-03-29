@@ -8,8 +8,8 @@ import (
 	"github.com/hpcloud/tail"
 	"github.com/hpcloud/tail/ratelimiter"
 
-	tpm "tailpipe/mail"
-	"tailpipe/payload"
+	tpm "tailpipe/src/mail"
+	"tailpipe/src/payload"
 )
 
 func tailf(conf tConfig) {

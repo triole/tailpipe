@@ -1,8 +1,10 @@
 package payload
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/hpcloud/tail"
 )
@@ -28,6 +30,18 @@ func NewPayload(line *tail.Line) (p Payload) {
 		Host:      getHostName(),
 		TailError: line.Err,
 		Text:      line.Text,
+	}
+}
+
+// NewTestPayload returns a test payload to send using the mail parameter
+func NewTestPayload(text string) (p Payload) {
+	return Payload{
+		Date: time.Now().Format(dateLayout),
+		Host: getHostName(),
+		TailError: errors.New(
+			"This is a test error. Keep calm, no real error occured.",
+		),
+		Text: text,
 	}
 }
 

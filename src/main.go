@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+	tpm "tailpipe/src/mail"
+	"tailpipe/src/payload"
 )
 
 func main() {
@@ -11,6 +13,13 @@ func main() {
 	confFile, _ := filepath.Abs(CLI.ConfigFile)
 	conf := readConfig(confFile)
 
-	fmt.Printf("Watch file %q\n", conf.FileToWatch)
-	tailf(conf)
+	if CLI.Mail != "" {
+		tpm.SendMail(
+			payload.NewTestPayload(CLI.Mail),
+			conf.Mail,
+		)
+	} else {
+		fmt.Printf("Watch file %q\n", conf.FileToWatch)
+		tailf(conf)
+	}
 }

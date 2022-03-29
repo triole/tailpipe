@@ -6,7 +6,7 @@ import (
 	"net/smtp"
 	"strconv"
 	"strings"
-	"tailpipe/payload"
+	"tailpipe/src/payload"
 	"text/template"
 )
 

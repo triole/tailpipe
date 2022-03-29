@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	tpm "tailpipe/mail"
+	tpm "tailpipe/src/mail"
 
 	"github.com/pelletier/go-toml"
 )
