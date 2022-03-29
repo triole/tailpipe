@@ -15,7 +15,7 @@ func main() {
 
 	if CLI.Mail != "" {
 		tpm.SendMail(
-			payload.NewTestPayload(CLI.Mail),
+			payload.NewTestPayload(CLI.Mail, CLI.Attachments),
 			conf.Mail,
 		)
 	} else {

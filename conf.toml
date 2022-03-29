@@ -1,0 +1,27 @@
+# do not touch, file to watch will be auto detected inside the container
+file_to_watch = "<FILE_TO_WATCH>"
+regex_filter = "(?i)(error|fail|fatal)"
+action = "mail"
+
+[mail]
+host = "192.168.0.7"
+port = 1025
+user = "test_user"
+pass = "none"
+encryption = "none"    # "none", "ssl", "tls"
+
+addr_from = "tailpipe@vigilant.watch"
+addr_to = ["recipient@mail.somewhere"]
+subject = "Error on {{.Host}}"
+template = """
+Date:
+{{.Date}}
+
+Message:
+{{.Text}}
+
+{{if .TailError}}
+There was a tail error:
+{{.TailError}}
+{{end}}
+"""

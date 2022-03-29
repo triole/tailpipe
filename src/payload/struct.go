@@ -15,12 +15,13 @@ var (
 
 // Payload holds the information that are transmitted
 type Payload struct {
-	Date         string
-	LogFile      string
-	Host         string
-	Text         string
-	TailError    error
-	TailErrorStr string
+	Date            string
+	LogFile         string
+	Host            string
+	Text            string
+	TailError       error
+	TailErrorStr    string
+	AttachmentFiles []string
 }
 
 // NewPayload returns a new payload object
@@ -34,14 +35,15 @@ func NewPayload(line *tail.Line) (p Payload) {
 }
 
 // NewTestPayload returns a test payload to send using the mail parameter
-func NewTestPayload(text string) (p Payload) {
+func NewTestPayload(text string, attachments []string) (p Payload) {
 	return Payload{
 		Date: time.Now().Format(dateLayout),
 		Host: getHostName(),
 		TailError: errors.New(
-			"This is a test error. Keep calm, no real error occured.",
+			"This is a test error. Keep calm, nothing really happened.",
 		),
-		Text: text,
+		Text:            text,
+		AttachmentFiles: attachments,
 	}
 }
 

@@ -29,5 +29,7 @@ func readConfig(filename string) (config tConfig) {
 		fmt.Printf("Error decoding preset file: %q\n", err)
 	}
 	config.Mail.Encryption = strings.ToLower(config.Mail.Encryption)
+	config.Mail.AttachmentFiles = CLI.Attachments
+	config.Mail.Print = CLI.Print
 	return
 }

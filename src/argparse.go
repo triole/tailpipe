@@ -22,9 +22,11 @@ var (
 var CLI struct {
 	ConfigFile string `help:"configuration file" optional arg`
 	// FileToWatch string `help:"file to watch, arg is required" short:f`
-	Mail        string `help:"send an email containing a given string" short:m`
-	Debug       bool   `help:"debug mode" short:d`
-	VersionFlag bool   `help:"display version" short:V`
+	Mail        string   `help:"send an email containing a given string" short:m`
+	Attachments []string `help:"test mail attachment, multiple use for multiple files" short:a`
+	Print       bool     `help:"print test mail, do not send" short:p`
+	Debug       bool     `help:"debug mode" short:d`
+	VersionFlag bool     `help:"display version" short:V`
 }
 
 func parseArgs() {

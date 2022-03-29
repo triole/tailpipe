@@ -1,83 +1,57 @@
 package mail
 
 import (
-	"bytes"
 	"fmt"
 	"net/smtp"
 	"strconv"
-	"strings"
 	"tailpipe/src/payload"
-	"text/template"
 )
 
 // SendMail sends an email via smtp
-func SendMail(p payload.Payload, conf Mail) {
-	if p.TailError != nil {
-		p.TailErrorStr = fmt.Sprintf("%s", p.TailError)
+func SendMail(payload payload.Payload, mail Mail) {
+	mail.Payload = payload
+	mail.Payload.Host = "Just Testing"
+	if mail.Payload.TailError != nil {
+		mail.Payload.TailErrorStr = fmt.Sprintf("%s", mail.Payload.TailError)
 	}
 
-	auth := smtp.PlainAuth("", conf.AddrFrom, conf.Pass, conf.Host)
-	if conf.Encryption == "none" {
+	auth := smtp.PlainAuth("", mail.AddrFrom, mail.Pass, mail.Host)
+	if mail.Encryption == "none" {
 		auth = unencryptedAuth{
 			smtp.PlainAuth(
-				"", conf.AddrFrom, conf.Pass, conf.Host,
+				"", mail.AddrFrom, mail.Pass, mail.Host,
 			),
 		}
 	}
 
-	mimeHeaders := []string{
-		"Content-Transfer-Encoding: quoted-printable",
-		"Content-Type: text/plain; charset=UTF-8",
-		"MIME-version: 1.0",
-		"From: <" + conf.AddrFrom + ">",
-		"To: " + joinMailAddr(conf.AddrTo),
-		"Subject: " + conf.Subject,
-		"\n",
+	if len(mail.AttachmentFiles) == 0 {
+		// plain text mail
+		mail.addTemplateToBody("header_plain.tpl")
+		mail.addStringToBody("\n")
+		mail.addStringToBody(payload.Text)
+	} else {
+		// multipart mail
+		mail.Boundary = randStr(48)
+		mail.addTemplateToBody("header_multipart.tpl")
+		mail.addTemplateToBody("ct_header_text.tpl")
+		mail.addStringToBody("\n")
+		mail.addStringToBody(payload.Text)
+		mail.addStringToBody("\n\n\n\n")
+		mail.addAttachments()
+		mail.addStringToBody("--" + mail.Boundary + "--")
 	}
 
-	var body bytes.Buffer
-	body.Write([]byte(strings.Join(mimeHeaders, "\n")))
-	body.Write([]byte(conf.Template))
-	body = execTemplate(body.String(), p)
-
-	err := smtp.SendMail(
-		conf.Host+":"+strconv.Itoa(conf.Port),
-		auth, conf.AddrFrom, conf.AddrTo, body.Bytes(),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
+	if mail.Print == true {
+		mail.print()
+	} else {
+		err := smtp.SendMail(
+			mail.Host+":"+strconv.Itoa(mail.Port),
+			auth, mail.AddrFrom, mail.AddrTo, mail.Body.Bytes(),
+		)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("Email sent to via %s to %s\n", mail.Host, mail.AddrTo)
 	}
-	fmt.Printf("Email sent to via %s to %s\n", conf.Host, conf.AddrTo)
-}
-
-func joinMailAddr(arr []string) (r string) {
-	var arr2 []string
-	for _, el := range arr {
-		arr2 = append(arr2, "<"+el+">")
-	}
-	r = strings.Join(arr2, ", ")
-	return
-}
-
-func execTemplate(str string, p payload.Payload) bytes.Buffer {
-	var buf bytes.Buffer
-	tpl, err := template.New("template").Parse(str)
-	if err != nil {
-		fmt.Printf("[error] Can not parse mail template: %q\n", err)
-		panic(err)
-	}
-
-	tpl.Execute(&buf, struct {
-		Date      string
-		Host      string
-		TailError string
-		Text      string
-	}{
-		Date:      p.Date,
-		Host:      p.Host,
-		TailError: p.TailErrorStr,
-		Text:      p.Text,
-	})
-	return buf
 }
