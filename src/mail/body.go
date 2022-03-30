@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"path"
@@ -14,6 +15,33 @@ var (
 	//go:embed templates
 	tpl embed.FS
 )
+
+const (
+	maxLineLength = 76
+)
+
+// TODO: fix this
+func (m *Mail) addBase64WrapToBody(b []byte) {
+	// w = new(bytes.Buffer)
+	// 57 raw bytes per 76-byte base64 line.
+	const maxRaw = 57
+	// Buffer for each line, including trailing CRLF.
+	buffer := make([]byte, maxLineLength+len("\r\n"))
+	copy(buffer[maxLineLength:], "\r\n")
+	// Process raw chunks until there's no longer enough to fill a line.
+	for len(b) >= maxRaw {
+		base64.StdEncoding.Encode(buffer, b[:maxRaw])
+		m.Body.Write(buffer)
+		b = b[maxRaw:]
+	}
+	// Handle the last chunk of bytes.
+	if len(b) > 0 {
+		out := buffer[:base64.StdEncoding.EncodedLen(len(b))]
+		base64.StdEncoding.Encode(out, b)
+		out = append(out, "\r\n"...)
+		m.Body.Write(out)
+	}
+}
 
 func (m *Mail) addStringToBody(str string) {
 	m.Body.Write([]byte(str))
